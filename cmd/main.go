@@ -3,10 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"surgepress/internal/argparser"
-	"surgepress/internal/content"
 	"surgepress/internal/filewalker"
 	"surgepress/internal/help"
 	"surgepress/internal/pagebuilder"
@@ -17,67 +15,62 @@ import (
 func main() {
 	projectPath, configFilePath, err := argparser.ArgParser(os.Args)
 	if err != nil {
-		helpString, err := help.Usage(os.Args)
-		if err == nil {
-			panic(err)
+		helpString, helpErr := help.Usage(os.Args)
+		if helpErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to generate usage: %v\n", helpErr)
+			os.Exit(1)
 		}
-		fmt.Fprintf(os.Stderr, "%s", helpString)
+
+		fmt.Fprint(os.Stderr, helpString)
+		return
 	}
+
 	projectRootPath, err := pathutil.GetProjectPath(projectPath)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "invalid project path: %v\n", err)
+		os.Exit(1)
 	}
 
-	templateDir := "internal/template"
-	//check config file path is valid filetype
-	if !pathutil.ValidateFile(configFilePath) {
-		panic("Invalid config file path")
-	}
-	configFile, err := os.Open(configFilePath)
-	defer configFile.Close()
 	if !pathutil.ValidateDir(projectRootPath) {
-		panic("Invalid project root path")
+		fmt.Fprintf(os.Stderr, "invalid project directory: %s\n", projectRootPath)
+		os.Exit(1)
 	}
 
-	// 2. Initialize the target variable
+	if !pathutil.ValidateFile(configFilePath) {
+		fmt.Fprintf(os.Stderr, "invalid config file: %s\n", configFilePath)
+		os.Exit(1)
+	}
+
+	configFile, err := os.Open(configFilePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open config file: %v\n", err)
+		os.Exit(1)
+	}
+	defer configFile.Close()
+
 	var configData siteconfig.MetaData
-	//indexMeta := siteconfig.IndexMeta{
-	//	Title:       "My Blog",
-	//	Description: "My brand new exciting blog",
-	//	Link:        "https://blog.com",
-	//	Language:    "en-US",
-	//}
-	// 3. Create a decoder and decode the stream
+
 	decoder := json.NewDecoder(configFile)
 	if err := decoder.Decode(&configData); err != nil {
-		log.Fatalf("failed to decode JSON: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to decode config JSON: %v\n", err)
+		os.Exit(1)
 	}
 
 	pages, err := filewalker.WalkFiles(projectRootPath)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "failed to discover Markdown files: %v\n", err)
+		os.Exit(1)
 	}
 
-	//also template injection? maybe as part of build pages
-	//style sheets too
-	err = pagebuilder.BuildPages(pages, templateDir, configData)
-	if err != nil {
-		panic(err)
+	templateDir := "internal/template"
+
+	if err := pagebuilder.BuildPages(pages, templateDir, configData); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to build pages: %v\n", err)
+		os.Exit(1)
 	}
 
-	err = pagebuilder.BuildIndex(pages, templateDir, configData)
-	if err != nil {
-		panic(err)
+	if err := pagebuilder.BuildIndex(pages, templateDir, configData); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to build index: %v\n", err)
+		os.Exit(1)
 	}
-}
-
-func PrintHTML(builtPages []content.RenderedPage) {
-	for i, page := range builtPages {
-		fmt.Printf("Page %d:\n", i)
-		fmt.Printf("  OutputPath: %s\n", page.OutputPath)
-		fmt.Printf("  HTML length: %d bytes\n", len(page.HTML))
-		fmt.Printf("  HTML preview: %s\n", string(page.HTML)) // Full HTML
-		fmt.Println("---")
-	}
-
 }
