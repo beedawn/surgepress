@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/beedawn/surgepress/internal/indexpost"
 	"github.com/beedawn/surgepress/internal/siteconfig"
-	"github.com/google/uuid"
 	"html"
 	"os"
 	"time"
@@ -104,10 +103,7 @@ func RSSBuilder(posts []indexpost.IndexPost, indexMeta siteconfig.MetaData) (RSS
 	}
 	for _, post := range rssPosts {
 		//make guid for each item
-		v7ID, err := uuid.NewV7()
-		if err != nil {
-			return RSS{}, fmt.Errorf("Failed to generate V7 UUID: %v", err)
-		}
+		postURL := indexMeta.Link + post.URL
 		//make publish date for each item
 		var pubDate string
 		t, err := time.Parse("2006-01-02", post.Date)
@@ -119,11 +115,13 @@ func RSSBuilder(posts []indexpost.IndexPost, indexMeta siteconfig.MetaData) (RSS
 
 		feed.Channel.Items = append(feed.Channel.Items, Item{
 			Title:       post.Title,
-			Link:        indexMeta.Link + post.URL,
+			Link:        postURL,
 			Description: post.Content,
 			PubDate:     pubDate,
-			GUID: GUID{Value: v7ID.String(),
-				IsPermaLink: "false"},
+			GUID: GUID{
+				Value:       postURL,
+				IsPermaLink: "true",
+			},
 		})
 
 	}

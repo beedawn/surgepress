@@ -350,3 +350,40 @@ func TestRSSBuilder_WithSpecialCharacters(t *testing.T) {
 		t.Error("Title should contain special characters")
 	}
 }
+
+func TestRSSBuilder_StableGUID(t *testing.T) {
+	posts := []indexpost.IndexPost{
+		{
+			Title: "Test Post",
+			URL:   "/posts/test.html",
+			Date:  "2026-08-17",
+		},
+	}
+
+	meta := siteconfig.MetaData{
+		Title: "Test Site",
+		Link:  "https://example.com",
+	}
+
+	feed1, err := RSSBuilder(posts, meta)
+	if err != nil {
+		t.Fatalf("first RSSBuilder call failed: %v", err)
+	}
+
+	feed2, err := RSSBuilder(posts, meta)
+	if err != nil {
+		t.Fatalf("second RSSBuilder call failed: %v", err)
+	}
+
+	got1 := feed1.Channel.Items[0].GUID.Value
+	got2 := feed2.Channel.Items[0].GUID.Value
+
+	if got1 != got2 {
+		t.Errorf("GUID is not stable: %q != %q", got1, got2)
+	}
+
+	want := "https://example.com/posts/test.html"
+	if got1 != want {
+		t.Errorf("GUID = %q, want %q", got1, want)
+	}
+}
