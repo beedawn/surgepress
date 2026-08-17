@@ -59,14 +59,18 @@ type GUID struct {
 
 func RSSGenerator(posts []indexpost.IndexPost, indexMeta siteconfig.MetaData) error {
 	feed, err := RSSBuilder(posts, indexMeta)
-	err = CheckOutDir(feed)
 	if err != nil {
+		return fmt.Errorf("failed to build RSS feed: %w", err)
+	}
+
+	if err := CheckOutDir(); err != nil {
 		return err
 	}
-	err = WriteRSS(feed, indexMeta, "out/feed.xml")
-	if err != nil {
+
+	if err := WriteRSS(feed, indexMeta, "out/feed.xml"); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -125,7 +129,7 @@ func RSSBuilder(posts []indexpost.IndexPost, indexMeta siteconfig.MetaData) (RSS
 	}
 	return feed, nil
 }
-func CheckOutDir(feed RSS) error {
+func CheckOutDir() error {
 	if err := os.MkdirAll("out", 0755); err != nil {
 		return fmt.Errorf("failed to create output dir: %w", err)
 	}

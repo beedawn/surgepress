@@ -65,15 +65,17 @@ func BuildPages(pages []content.Page, templateDir string, configData siteconfig.
 		data["GlobalStylesheets"] = globalStylesheets
 		fmt.Println("pages")
 		fmt.Println(data)
-		var pageTmpl *template.Template
 		templateName, _ := metaData["Template"].(string)
 		if templateName == "" {
 			templateName = "default.html"
-
 		}
-		joinedTemplatePath := filepath.Join(templateDir, templateName)
-		pageTmpl = template.Must(template.ParseFiles(joinedTemplatePath))
 
+		joinedTemplatePath := filepath.Join(templateDir, templateName)
+
+		pageTmpl, err := template.ParseFiles(joinedTemplatePath)
+		if err != nil {
+			return fmt.Errorf("failed to parse template %s: %w", joinedTemplatePath, err)
+		}
 		if err := pageTmpl.ExecuteTemplate(&htmlContent, templateName, data); err != nil {
 			return err
 		}
@@ -81,7 +83,9 @@ func BuildPages(pages []content.Page, templateDir string, configData siteconfig.
 			OutputPath: page.OutputPath,
 			HTML:       htmlContent.Bytes(),
 		}
-		filewriter.WriteFile(renderedPage)
+		if err := filewriter.WriteFile(renderedPage); err != nil {
+			return fmt.Errorf("failed to write page %s: %w", page.OutputPath, err)
+		}
 	}
 	return nil
 }
@@ -135,10 +139,11 @@ func BuildIndex(pages []content.Page, templateDir string, configData siteconfig.
 		"GlobalStylesheets": configData.Global_Stylesheets, // From config file
 
 	}
-	fmt.Println("build index")
-	fmt.Println(data)
+
 	// send title, date and content to RSS builder
-	rssbuilder.RSSGenerator(posts, configData)
+	if err := rssbuilder.RSSGenerator(posts, configData); err != nil {
+		return fmt.Errorf("failed to generate RSS feed: %w", err)
+	}
 
 	var htmlContent bytes.Buffer
 
