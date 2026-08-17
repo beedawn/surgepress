@@ -2,11 +2,11 @@ package filewalker
 
 import (
 	"fmt"
+	"github.com/beedawn/surgepress/internal/content"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
-	"surgepress/internal/content"
 )
 
 func WalkFiles(project_root_path string) ([]content.Page, error) {

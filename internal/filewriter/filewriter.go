@@ -1,9 +1,9 @@
 package filewriter
 
 import (
+	"github.com/beedawn/surgepress/internal/content"
 	"os"
 	"path/filepath"
-	"surgepress/internal/content"
 )
 
 func createDir(outputPath string) error {

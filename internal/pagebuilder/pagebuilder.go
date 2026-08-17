@@ -3,17 +3,17 @@ package pagebuilder
 import (
 	"bytes"
 	"fmt"
+	"github.com/beedawn/surgepress/internal/content"
+	"github.com/beedawn/surgepress/internal/filewriter"
+	"github.com/beedawn/surgepress/internal/indexpost"
+	"github.com/beedawn/surgepress/internal/rssbuilder"
+	"github.com/beedawn/surgepress/internal/siteconfig"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/parser"
 	"html/template"
 	"os"
 	"path/filepath"
-	"surgepress/internal/content"
-	"surgepress/internal/filewriter"
-	"surgepress/internal/indexpost"
-	"surgepress/internal/rssbuilder"
-	"surgepress/internal/siteconfig"
 )
 
 //goldmark is markdown parser...

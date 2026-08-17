@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"surgepress/internal/indexpost"
-	"surgepress/internal/siteconfig"
+	"github.com/beedawn/surgepress/internal/indexpost"
+	"github.com/beedawn/surgepress/internal/siteconfig"
 )
 
 func TestRSSGenerator(t *testing.T) {
@@ -134,7 +134,7 @@ func TestRSSBuilder_InvalidDate(t *testing.T) {
 
 func TestCheckOutDir(t *testing.T) {
 	// Test with existing directory
-	err := CheckOutDir(RSS{})
+	err := CheckOutDir()
 	if err != nil {
 		t.Errorf("CheckOutDir failed: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestCheckOutDir_WithPermissions(t *testing.T) {
 	// This tests the error path
 
 	// Test that we can create the out directory normally
-	err = CheckOutDir(RSS{})
+	err = CheckOutDir()
 	if err != nil {
 		t.Errorf("CheckOutDir failed: %v", err)
 	}

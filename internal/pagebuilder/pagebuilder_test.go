@@ -2,12 +2,12 @@ package pagebuilder
 
 import (
 	"encoding/json"
+	"github.com/beedawn/surgepress/internal/content"
+	"github.com/beedawn/surgepress/internal/pathutil"
+	"github.com/beedawn/surgepress/internal/siteconfig"
 	"log"
 	"os"
 	"path/filepath"
-	"surgepress/internal/content"
-	"surgepress/internal/pathutil"
-	"surgepress/internal/siteconfig"
 	"testing"
 )
 

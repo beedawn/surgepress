@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/beedawn/surgepress/internal/argparser"
+	"github.com/beedawn/surgepress/internal/filewalker"
+	"github.com/beedawn/surgepress/internal/help"
+	"github.com/beedawn/surgepress/internal/pagebuilder"
+	"github.com/beedawn/surgepress/internal/pathutil"
+	"github.com/beedawn/surgepress/internal/siteconfig"
 	"os"
-	"surgepress/internal/argparser"
-	"surgepress/internal/filewalker"
-	"surgepress/internal/help"
-	"surgepress/internal/pagebuilder"
-	"surgepress/internal/pathutil"
-	"surgepress/internal/siteconfig"
 )
 
 func main() {

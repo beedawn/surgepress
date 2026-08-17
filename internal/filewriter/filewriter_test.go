@@ -1,10 +1,10 @@
 package filewriter
 
 import (
+	"github.com/beedawn/surgepress/internal/content"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"surgepress/internal/content"
 	"testing"
 )
 

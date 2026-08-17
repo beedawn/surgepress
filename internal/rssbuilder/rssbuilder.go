@@ -3,11 +3,11 @@ package rssbuilder
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/beedawn/surgepress/internal/indexpost"
+	"github.com/beedawn/surgepress/internal/siteconfig"
 	"github.com/google/uuid"
 	"html"
 	"os"
-	"surgepress/internal/indexpost"
-	"surgepress/internal/siteconfig"
 	"time"
 )
 
