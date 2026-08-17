@@ -1,25 +1,29 @@
 package argparser
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestArgParserValid(t *testing.T) {
-	helpString := []string{"./main", "markdownfiles/", "config.json"}
-	projectPath, configPath, err := ArgParser(helpString)
-	if projectPath != helpString[1] && configPath != helpString[2] {
-		fmt.Errorf("argues not parsed properly")
-	}
+	args := []string{"./main", "markdownfiles/", "config.json"}
+
+	projectPath, configPath, err := ArgParser(args)
 	if err != nil {
-		fmt.Errorf("problem parsing arguments")
+		t.Fatalf("ArgParser returned unexpected error: %v", err)
+	}
+
+	if projectPath != args[1] {
+		t.Errorf("projectPath = %q, want %q", projectPath, args[1])
+	}
+
+	if configPath != args[2] {
+		t.Errorf("configPath = %q, want %q", configPath, args[2])
 	}
 }
 
-func TestUsageEmpty(t *testing.T) {
-	helpString := []string{}
-	_, _, err := ArgParser(helpString)
+func TestArgParserEmpty(t *testing.T) {
+	args := []string{}
+
+	_, _, err := ArgParser(args)
 	if err == nil {
-		fmt.Errorf("help output = %v, want nil", err)
+		t.Fatal("ArgParser with no arguments should return an error")
 	}
 }
