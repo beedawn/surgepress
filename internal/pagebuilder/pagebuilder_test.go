@@ -336,3 +336,72 @@ Date: ""
 		t.Error("Should throw error about empty markdown, empty date")
 	}
 }
+
+func TestBuildPages_MissingTemplateReturnsError(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	sourcePath := filepath.Join(tmpDir, "page.md")
+	markdown := `---
+Title: "Test Page"
+Template: "does-not-exist.html"
+---
+
+# Hello
+`
+
+	if err := os.WriteFile(sourcePath, []byte(markdown), 0644); err != nil {
+		t.Fatalf("failed to create test markdown: %v", err)
+	}
+
+	pages := []content.Page{
+		{
+			SourcePath: sourcePath,
+			OutputPath: filepath.Join(tmpDir, "out", "page.html"),
+		},
+	}
+
+	err := BuildPages(pages, tmpDir, siteconfig.MetaData{})
+	if err == nil {
+		t.Fatal("expected error for missing template, got nil")
+	}
+}
+
+func TestBuildPages_WriteFailureReturnsError(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create a valid template.
+	templatePath := filepath.Join(tmpDir, "default.html")
+	templateData := `<!DOCTYPE html>
+<html>
+<body>{{.Content}}</body>
+</html>`
+
+	if err := os.WriteFile(templatePath, []byte(templateData), 0644); err != nil {
+		t.Fatalf("failed to create template: %v", err)
+	}
+
+	// Create valid Markdown.
+	sourcePath := filepath.Join(tmpDir, "page.md")
+	if err := os.WriteFile(sourcePath, []byte("# Hello"), 0644); err != nil {
+		t.Fatalf("failed to create markdown: %v", err)
+	}
+
+	// Put a regular file where BuildPages expects a directory.
+	// filepath.Join(blocker, "page.html") therefore cannot be created.
+	blocker := filepath.Join(tmpDir, "blocked")
+	if err := os.WriteFile(blocker, []byte("not a directory"), 0644); err != nil {
+		t.Fatalf("failed to create blocker file: %v", err)
+	}
+
+	pages := []content.Page{
+		{
+			SourcePath: sourcePath,
+			OutputPath: filepath.Join(blocker, "page.html"),
+		},
+	}
+
+	err := BuildPages(pages, tmpDir, siteconfig.MetaData{})
+	if err == nil {
+		t.Fatal("expected file write error, got nil")
+	}
+}
