@@ -1,0 +1,7 @@
+{
+  "Title":       "My Blog222",
+  "Description": "My brand new exciting blog",
+  "Link":        "https://blog.com",
+  "Language":    "en-US",
+  "Global_Stylesheets": ["G_test.css"]
+}

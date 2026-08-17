@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>My Blog222</title>
+    <link>https://blog.com</link>
+    <description>My brand new exciting blog</description>
+    <language>en-US</language>
+    <atom:link href="https://blog.com/feed.xml" rel="self" type="application/rss+xml"></atom:link>
+    <item>
+      <title>blank</title>
+      <link>https://blog.comout/test.html</link>
+      <description></description>
+      <pubDate>Mon, 15 Jan 2024 00:00:00 +0000</pubDate>
+      <guid isPermaLink="false">019f163f-7d69-7d56-9fab-be348745f552</guid>
+    </item>
+  </channel>
+</rss>

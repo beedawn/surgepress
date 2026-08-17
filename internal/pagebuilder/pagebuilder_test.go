@@ -1,0 +1,337 @@
+package pagebuilder
+
+import (
+	"encoding/json"
+	"log"
+	"os"
+	"surgepress/internal/content"
+	"surgepress/internal/pathutil"
+	"surgepress/internal/siteconfig"
+	"testing"
+)
+
+var testDir string = "../../internal/template"
+
+var config_file_path string = "../../test_data/configdata.json"
+
+//check config file path is valid filetype
+
+func genConfigData() siteconfig.MetaData {
+	if !pathutil.ValidateFile(config_file_path) {
+		panic("Invalid config file path")
+	}
+	config_file, _ := os.Open(config_file_path)
+	defer config_file.Close()
+
+	// 2. Initialize the target variable
+	var configData siteconfig.MetaData
+	//indexMeta := siteconfig.IndexMeta{
+	//	Title:       "My Blog",
+	//	Description: "My brand new exciting blog",
+	//	Link:        "https://blog.com",
+	//	Language:    "en-US",
+	//}
+	// 3. Create a decoder and decode the stream
+	decoder := json.NewDecoder(config_file)
+	if err := decoder.Decode(&configData); err != nil {
+		log.Fatalf("failed to decode JSON: %v", err)
+	}
+	return configData
+}
+
+func TestPageBuilder_Valid(T *testing.T) {
+
+	testPages := []content.Page{}
+	testPage := content.Page{
+		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/test.md",
+		OutputPath: "out/test.html",
+	}
+	testPages = append(testPages, testPage)
+	configData := genConfigData()
+	err := BuildPages(testPages, testDir, configData)
+	//need to use these variabels and check output
+	if err != nil {
+		T.Error(err)
+	}
+	//	if len(renderedPages) != len(testPages) {
+	//		T.Errorf("Expected %d pages, got %d", len(testPages), len(renderedPages))
+	//	}
+	//
+	//	if renderedPages[0].OutputPath != "out/test.html" {
+	//		T.Errorf("Output path should be out/test.html, got %v", renderedPages[0].OutputPath)
+	//	}
+	//	if string(renderedPages[0].HTML) != `<!DOCTYPE html>
+	//<html lang="en">
+	//<head>
+	//<meta charset="utf-8">
+	//<title>
+	//test title</title>
+	//		</head>
+	//			<body>hello world</body>
+	//</html>` {
+	//		T.Errorf("HTML output does not match expected")
+	//
+	//	}
+
+}
+
+func TestPageBuilder_EmptyContent(T *testing.T) {
+
+	testPages := []content.Page{}
+	testPage := content.Page{
+		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/blank.md",
+		OutputPath: "out/test.html",
+	}
+	configData := genConfigData()
+	testPages = append(testPages, testPage)
+	err := BuildPages(testPages, testDir, configData)
+	//need to use these variabels and check output
+	if err != nil {
+		T.Error(err)
+	}
+	//	if len(renderedPages) != len(testPages) {
+	//		T.Errorf("Expected %d pages, got %d", len(testPages), len(renderedPages))
+	//	}
+	//
+	//	if renderedPages[0].OutputPath != "out/test.html" {
+	//		T.Errorf("Output path should be out/test.html, got %v", renderedPages[0].OutputPath)
+	//	}
+	//	if string(renderedPages[0].HTML) != `<!DOCTYPE html>
+	//<html lang="en">
+	//<head>
+	//<meta charset="utf-8">
+	//<title>
+	//test title</title>
+	//		</head>
+	//			<body></body>
+	//</html>` {
+	//		T.Errorf("HTML output does not match expected")
+	//
+	//	}
+
+}
+
+func TestPageBuilder_TwoPagest(T *testing.T) {
+
+	testPages := []content.Page{}
+	testPage := content.Page{
+		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/test.md",
+		OutputPath: "out/test.html",
+	}
+	testPage2 := content.Page{
+		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/test.md",
+		OutputPath: "out/test.html",
+	}
+	configData := genConfigData()
+	testPages = append(testPages, testPage)
+	testPages = append(testPages, testPage2)
+	err := BuildPages(testPages, testDir, configData)
+	//need to use these variabels and check output
+	if err != nil {
+		T.Error(err)
+	}
+	//if len(renderedPages) != len(testPages) {
+	//	T.Errorf("Expected %d pages, got %d", len(testPages), len(renderedPages))
+	//}
+
+}
+
+func TestPageBuilder_InvalidPath(t *testing.T) {
+	testPages := []content.Page{
+		{
+			SourcePath: "/nonexistent/path.md",
+			OutputPath: "out/test.html",
+		},
+	}
+	configData := genConfigData()
+	// This should handle the error gracefully
+	err := BuildPages(testPages, testDir, configData)
+	if err != nil {
+		// Depending on your implementation, this might or might not error
+		t.Logf("Expected error occurred: %v", err)
+	}
+
+	// Even if it errors, make sure it doesn't panic
+	//if len(renderedPages) >= 0 { // Just to make sure it doesn't crash
+	//	t.Logf("Function completed without panic")
+	//}
+}
+
+func TestBuildPagesWithNoTemplate(t *testing.T) {
+	// Create a file that might cause issues during parsing
+	testMD := `---
+title: "Test Page"
+date: "2023-01-01"
+---
+
+This is a valid markdown document.
+
+[link](http://example.com)
+
+` // Missing closing parenthesis - this might cause issues
+
+	tmpFile := "test_malformed.md"
+	err := os.WriteFile(tmpFile, []byte(testMD), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	defer os.Remove(tmpFile)
+
+	configData := siteconfig.MetaData{
+		Global_Stylesheets: []string{"/css/main.css"},
+	}
+
+	testPages := []content.Page{
+		{
+			SourcePath: tmpFile,
+			OutputPath: "out/test.html",
+		},
+	}
+
+	err = BuildPages(testPages, testDir, configData)
+	if err != nil {
+		t.Logf("Got error (might be from md.Convert): %v", err)
+	} else {
+		t.Log("No error occurred - this is fine for valid markdown")
+	}
+}
+func TestIndexBuilder_Valid(t *testing.T) {
+	testPages := []content.Page{
+		{
+			SourcePath: "/Users/beeschmersal/go/surgepress/test_data/blank.md",
+			OutputPath: "out/test.html",
+		},
+	}
+
+	configData := genConfigData()
+	err := BuildIndex(testPages, testDir, configData)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestIndexBuilder_BadPath(t *testing.T) {
+	testPages := []content.Page{
+		{
+			SourcePath: "blank.md",
+			OutputPath: "out/test.html",
+		},
+	}
+
+	configData := genConfigData()
+	err := BuildIndex(testPages, testDir, configData)
+	if err == nil {
+		t.Error("Supposed to throw file error!")
+	}
+}
+
+func TestIndexBuilder_EmptyMarkdown(t *testing.T) {
+
+	testMD := `
+` // Missing closing parenthesis - this might cause issues
+
+	tmpFile := "test_malformed.md"
+	err := os.WriteFile(tmpFile, []byte(testMD), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	defer os.Remove(tmpFile)
+	testPages := []content.Page{
+		{
+			SourcePath: tmpFile,
+			OutputPath: "out/test.html",
+		},
+	}
+
+	configData := genConfigData()
+	err = BuildIndex(testPages, testDir, configData)
+	if err == nil {
+		t.Error("Should throw error about empty markdown, missing title, date")
+	}
+}
+
+func TestIndexBuilder_EmptyTitle(t *testing.T) {
+
+	testMD := `---
+Title: ""
+Date: "2023-01-01"
+---
+
+` // Missing closing parenthesis - this might cause issues
+
+	tmpFile := "test_malformed.md"
+	err := os.WriteFile(tmpFile, []byte(testMD), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	defer os.Remove(tmpFile)
+	testPages := []content.Page{
+		{
+			SourcePath: tmpFile,
+			OutputPath: "out/test.html",
+		},
+	}
+
+	configData := genConfigData()
+	err = BuildIndex(testPages, testDir, configData)
+	if err == nil {
+		t.Error("Should throw error about empty title")
+	}
+}
+
+func TestIndexBuilder_MissingDate(t *testing.T) {
+
+	testMD := `---
+Title: "Test Page"
+---
+
+` // Missing closing parenthesis - this might cause issues
+
+	tmpFile := "test_malformed.md"
+	err := os.WriteFile(tmpFile, []byte(testMD), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	defer os.Remove(tmpFile)
+	testPages := []content.Page{
+		{
+			SourcePath: tmpFile,
+			OutputPath: "out/test.html",
+		},
+	}
+
+	configData := genConfigData()
+	err = BuildIndex(testPages, testDir, configData)
+	if err == nil {
+		t.Error("Should throw error about empty markdown, missing date")
+	}
+}
+
+func TestIndexBuilder_EmptyDate(t *testing.T) {
+
+	testMD := `---
+Title: "Test Page"
+Date: ""
+---
+
+` // Missing closing parenthesis - this might cause issues
+
+	tmpFile := "test_malformed.md"
+	err := os.WriteFile(tmpFile, []byte(testMD), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	defer os.Remove(tmpFile)
+	testPages := []content.Page{
+		{
+			SourcePath: tmpFile,
+			OutputPath: "out/test.html",
+		},
+	}
+
+	configData := genConfigData()
+	err = BuildIndex(testPages, testDir, configData)
+	if err == nil {
+		t.Error("Should throw error about empty markdown, empty date")
+	}
+}

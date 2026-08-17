@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    {{- if .Title }}
+    <title>{{.Title}}</title>
+    {{- end }}
+    {{- range .GlobalStylesheets }}
+    <link rel="stylesheet" href="{{ . }}">
+    {{- end }}
+</head>
+<body>
+{{- range .Posts }}
+<div>
+    {{if .Title}}<title>{{.Title}}</title>{{end}}
+{{ if .Date }}<small>{{ .Date }}</small>{{end}}
+    <div>
+{{ .Content -}}
+    </div>
+</div>
+{{- end }}
+</body>
+</html>
