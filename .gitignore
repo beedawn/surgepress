@@ -1,0 +1,29 @@
+out/
+main
+
+# IDE / editor metadata
+.idea/
+.vscode/
+
+# Build output
+/out/
+/main
+/surgepress
+/bin/
+*.exe
+*.test
+
+# Go coverage / profiling artifacts
+coverage.out
+coverage.html
+*.prof
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
