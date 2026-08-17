@@ -4,24 +4,25 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 	"surgepress/internal/content"
 	"surgepress/internal/pathutil"
 	"surgepress/internal/siteconfig"
 	"testing"
 )
 
-var testDir string = "../../internal/template"
-
-var config_file_path string = "../../test_data/configdata.json"
+var testDir = filepath.Join("..", "..", "internal", "template")
+var testDataDir = filepath.Join("..", "..", "test_data")
+var configFilePath = filepath.Join(testDataDir, "configdata.json")
 
 //check config file path is valid filetype
 
 func genConfigData() siteconfig.MetaData {
-	if !pathutil.ValidateFile(config_file_path) {
+	if !pathutil.ValidateFile(configFilePath) {
 		panic("Invalid config file path")
 	}
-	config_file, _ := os.Open(config_file_path)
-	defer config_file.Close()
+	configFile, _ := os.Open(configFilePath)
+	defer configFile.Close()
 
 	// 2. Initialize the target variable
 	var configData siteconfig.MetaData
@@ -32,7 +33,7 @@ func genConfigData() siteconfig.MetaData {
 	//	Language:    "en-US",
 	//}
 	// 3. Create a decoder and decode the stream
-	decoder := json.NewDecoder(config_file)
+	decoder := json.NewDecoder(configFile)
 	if err := decoder.Decode(&configData); err != nil {
 		log.Fatalf("failed to decode JSON: %v", err)
 	}
@@ -43,7 +44,7 @@ func TestPageBuilder_Valid(T *testing.T) {
 
 	testPages := []content.Page{}
 	testPage := content.Page{
-		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/test.md",
+		SourcePath: filepath.Join(testDataDir, "test.md"),
 		OutputPath: "out/test.html",
 	}
 	testPages = append(testPages, testPage)
@@ -79,7 +80,7 @@ func TestPageBuilder_EmptyContent(T *testing.T) {
 
 	testPages := []content.Page{}
 	testPage := content.Page{
-		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/blank.md",
+		SourcePath: filepath.Join(testDataDir, "blank.md"),
 		OutputPath: "out/test.html",
 	}
 	configData := genConfigData()
@@ -115,11 +116,11 @@ func TestPageBuilder_TwoPagest(T *testing.T) {
 
 	testPages := []content.Page{}
 	testPage := content.Page{
-		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/test.md",
+		SourcePath: filepath.Join(testDataDir, "test.md"),
 		OutputPath: "out/test.html",
 	}
 	testPage2 := content.Page{
-		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/test.md",
+		SourcePath: filepath.Join(testDataDir, "test.md"),
 		OutputPath: "out/test.html",
 	}
 	configData := genConfigData()
@@ -198,7 +199,7 @@ This is a valid markdown document.
 func TestIndexBuilder_Valid(t *testing.T) {
 	testPages := []content.Page{
 		{
-			SourcePath: "/Users/beeschmersal/go/surgepress/test_data/blank.md",
+			SourcePath: filepath.Join(testDataDir, "blank.md"),
 			OutputPath: "out/test.html",
 		},
 	}

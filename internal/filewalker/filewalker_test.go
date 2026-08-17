@@ -4,11 +4,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
 	"testing"
 )
 
-var testData string = "/Users/beeschmersal/go/surgepress/test_data"
+var testData = filepath.Join("..", "..", "test_data")
 
 func TestGetProjectPath_Valid(t *testing.T) {
 	pages, err := WalkFiles(testData)
@@ -27,8 +26,8 @@ func TestGetProjectPath_Valid(t *testing.T) {
 	}
 
 	want := TestPage{
-		SourcePath: "/Users/beeschmersal/go/surgepress/test_data/blank.md",
-		OutputPath: "out/blank.html",
+		SourcePath: filepath.Join(testData, "blank.md"),
+		OutputPath: filepath.Join("out", "blank.html"),
 	}
 
 	if page.SourcePath != want.SourcePath {
@@ -59,35 +58,33 @@ func TestGetProjectPath_Blank(t *testing.T) {
 func TestGetProjectPath_BadPath(t *testing.T) {
 	pages, err := WalkFiles("/gibberish/132874891237")
 	if err == nil {
-		t.Fatalf("WalkFiles with blank path should have failed, but got pages %d", len(pages))
+		t.Fatalf("WalkFiles with nonexistent path should have failed")
 	}
 	if len(pages) != 0 {
-		t.Errorf("Expected 0 pages when path is blank, got %d", len(pages))
+		t.Errorf("Expected 0 pages, got %d", len(pages))
 	}
-
-	if err.Error() != "stat /gibberish/132874891237: no such file or directory" {
-		t.Errorf("Error mismatch, expected error 'stat /gibberish/132874891237: no such file or directory', got %v", err)
+	if !os.IsNotExist(err) {
+		t.Errorf("Expected file-not-found error, got %v", err)
 	}
-
 }
 
 func TestGetProjectPath_EmptyDir(t *testing.T) {
-	pages, err := WalkFiles("/Users/beeschmersal/go/surgepress/test_data/empty_dir")
+	emptyDir := t.TempDir()
+	pages, err := WalkFiles(emptyDir)
 	if err != nil {
-		t.Fatalf("Empty directory should not fail %v", err)
+		t.Fatalf("Empty directory should not fail: %v", err)
 	}
 	if len(pages) != 0 {
 		t.Errorf("Expected 0 pages when directory is empty, got %d", len(pages))
 	}
-
 }
 
 func TestGetProjectPath_FileIsNotDirectory(t *testing.T) {
-	_, err := WalkFiles("/Users/beeschmersal/go/surgepress/test_data/test.md")
+	testFile := filepath.Join(testData, "test.md")
+	_, err := WalkFiles(testFile)
 	if err == nil {
 		t.Error("Expected error when passing file path to WalkFiles")
 	}
-
 }
 
 func TestWalkFiles_PermissionError2(t *testing.T) {
