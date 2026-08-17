@@ -1,12 +1,12 @@
 package rssbuilder
 
 import (
-	"os"
-	"testing"
-	"time"
-
 	"github.com/beedawn/surgepress/internal/indexpost"
 	"github.com/beedawn/surgepress/internal/siteconfig"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
 )
 
 func TestRSSGenerator(t *testing.T) {
@@ -174,7 +174,6 @@ func TestCheckOutDir_WithPermissions(t *testing.T) {
 }
 
 func TestWriteRSS(t *testing.T) {
-	// Create a simple RSS feed for testing
 	feed := RSS{
 		Version: "2.0",
 		Channel: &Channel{
@@ -204,31 +203,22 @@ func TestWriteRSS(t *testing.T) {
 		Language:    "en-US",
 	}
 
-	// Test writing RSS
-	err := WriteRSS(feed, indexMeta, "../../out/feed.xml")
-	if err != nil {
-		t.Errorf("WriteRSS failed: %v", err)
+	outputPath := filepath.Join(t.TempDir(), "feed.xml")
+
+	if err := WriteRSS(feed, indexMeta, outputPath); err != nil {
+		t.Fatalf("WriteRSS failed: %v", err)
 	}
 
-	// Verify file was created and has content
-	fileInfo, err := os.Stat("../../out/feed.xml")
+	fileInfo, err := os.Stat(outputPath)
 	if err != nil {
-		t.Error("RSS file was not created")
+		t.Fatalf("RSS file was not created: %v", err)
 	}
 
 	if fileInfo.Size() == 0 {
 		t.Error("RSS file is empty")
 	}
-
-	// Clean up
-	os.Remove("out/feed.xml")
-	os.Remove("out")
 }
-
 func TestWriteRSS_FileError(t *testing.T) {
-	// This test is harder to create because we'd need to make the output directory unwritable
-	// For now, just verify the function can be called without panicking
-
 	feed := RSS{
 		Version: "2.0",
 		Channel: &Channel{
@@ -247,17 +237,20 @@ func TestWriteRSS_FileError(t *testing.T) {
 		Language:    "en-US",
 	}
 
-	// This should work normally
-	err := WriteRSS(feed, indexMeta, "../../out/feed.xml")
-	if err != nil {
-		t.Logf("WriteRSS returned error (expected in some scenarios): %v", err)
-	} else {
-		t.Log("WriteRSS completed successfully")
+	tempDir := t.TempDir()
+
+	// Create a regular file where a directory would need to exist.
+	blocker := filepath.Join(tempDir, "blocked")
+	if err := os.WriteFile(blocker, []byte("not a directory"), 0644); err != nil {
+		t.Fatalf("failed to create blocker file: %v", err)
 	}
 
-	// Clean up if file was created
-	os.Remove("out/feed.xml")
-	os.Remove("out")
+	outputPath := filepath.Join(blocker, "feed.xml")
+
+	err := WriteRSS(feed, indexMeta, outputPath)
+	if err == nil {
+		t.Fatal("expected WriteRSS to return an error")
+	}
 }
 
 func TestRSSBuilder_EmptyPosts(t *testing.T) {
