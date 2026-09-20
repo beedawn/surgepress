@@ -1,6 +1,5 @@
 package assetcopy
 
-
 import (
 	"errors"
 	"fmt"
@@ -10,9 +9,9 @@ import (
 	"path/filepath"
 )
 
-func CopyDir (srcDir, destDir string) error {
+func CopyDir(srcDir, destDir string) error {
 	info, err := os.Stat(srcDir)
-	if errors.Is(err, fs.ErrNotExist){
+	if errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}
 	if err != nil {

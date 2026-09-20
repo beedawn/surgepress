@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-
 func writeTestFile(t *testing.T, path, contents string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
@@ -25,7 +24,6 @@ func readTestFile(t *testing.T, path string) string {
 	}
 	return string(data)
 }
-
 
 func TestCopyDir_CopiesNestedFiles(t *testing.T) {
 	src := t.TempDir()

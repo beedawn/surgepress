@@ -12,7 +12,6 @@ import (
 	"github.com/beedawn/surgepress/internal/siteconfig"
 	"os"
 	"path/filepath"
-
 )
 
 func main() {
