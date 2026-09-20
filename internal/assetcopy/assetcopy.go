@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func CopyDir (srcDir, destDir) error {
+func CopyDir (srcDir, destDir string) error {
 	info, err := os.Stat(srcDir)
 	if errors.Is(err, fs.ErrNotExist){
 		return nil
@@ -22,7 +22,7 @@ func CopyDir (srcDir, destDir) error {
 		return fmt.Errorf("%s is not a diretory", srcDir)
 	}
 
-	return filepath.WalkDir(srcDir, func(path string, d fs.DireEntry, err error) error {
+	return filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
