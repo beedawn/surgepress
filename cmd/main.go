@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/beedawn/surgepress/internal/argparser"
+	"github.com/beedawn/surgepress/internal/assetcopy"
 	"github.com/beedawn/surgepress/internal/filewalker"
 	"github.com/beedawn/surgepress/internal/help"
 	"github.com/beedawn/surgepress/internal/pagebuilder"
 	"github.com/beedawn/surgepress/internal/pathutil"
 	"github.com/beedawn/surgepress/internal/siteconfig"
 	"os"
+	"path/filepath"
+
 )
 
 func main() {
@@ -71,6 +74,14 @@ func main() {
 
 	if err := pagebuilder.BuildIndex(pages, templateDir, configData); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to build index: %v\n", err)
+		os.Exit(1)
+	}
+
+	cssSourceDir := filepath.Join(projectRootPath, "css")
+	cssOutputDir := filepath.Join("out", "css")
+
+	if err := assetcopy.CopyDir(cssSourceDir, cssOutputDir); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to copy stylesheets: %v\n", err)
 		os.Exit(1)
 	}
 }

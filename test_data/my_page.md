@@ -5,4 +5,4 @@ Author: Alice
 Template: default.html
 Stylesheets: ["page_test.css"]
 ---
-my new page
+This is a test page
