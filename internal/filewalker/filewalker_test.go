@@ -14,8 +14,8 @@ func TestGetProjectPath_Valid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("WalkFiles failed: %v", err)
 	}
-	if len(pages) != 3 {
-		t.Errorf("Expected 3 page, got %d", len(pages))
+	if len(pages) != 4 {
+		t.Errorf("Expected 4 page, got %d", len(pages))
 	}
 
 	page := pages[0]

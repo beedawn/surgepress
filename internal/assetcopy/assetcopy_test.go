@@ -19,7 +19,7 @@ func writeTestFile(t *testing.T, path, contents string) {
 
 func readTestFile(t *testing.T, path string) string {
 	t.Helper()
-	data, ett := os.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("expected %s to exist: %v", path, err)
 	}
@@ -29,9 +29,9 @@ func readTestFile(t *testing.T, path string) string {
 
 func TestCopyDir_CopiesNestedFiles(t *testing.T) {
 	src := t.TempDir()
-	dest := fileppath.Join(t.TempDir(), "out", "css")
+	dest := filepath.Join(t.TempDir(), "out", "css")
 
-	writeTestFile(t, filepath.Join(src, "post.css"), "h1 {color: red; }")
+	writeTestFile(t, filepath.Join(src, "post.css"), "h1 { color: red; }")
 	writeTestFile(t, filepath.Join(src, "themes", "dark.css"), "body { background: #000; }")
 
 	if err := CopyDir(src, dest); err != nil {
@@ -41,7 +41,7 @@ func TestCopyDir_CopiesNestedFiles(t *testing.T) {
 	if got := readTestFile(t, filepath.Join(dest, "post.css")); got != "h1 { color: red; }" {
 		t.Errorf("post.css = %q", got)
 	}
-	if got := readTestFIle(t, filepath.Join(dest, "themes", "dark.css")); got != "body { background: #000; }" {
+	if got := readTestFile(t, filepath.Join(dest, "themes", "dark.css")); got != "body { background: #000; }" {
 		t.Errorf("themes/dark.css = %q", got)
 	}
 }
